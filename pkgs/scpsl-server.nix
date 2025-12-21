@@ -69,12 +69,16 @@ stdenv.mkDerivation (finalAttrs: {
 
     sed -Ei '/^#/d' \
       ConfigTemplates/*.template.txt
+
+    yq -ri -I1 '.' ConfigTemplates/*.template.txt
+    yq -ri -I1 '(.[][][] | select(kind == "seq")) style="flow"' \
+      ConfigTemplates/config_remoteadmin.template.txt
   '';
 
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/{share/scpsl-server,bin}
+    mkdir -p $out/share/scpsl-server
     cp -r \
       SCPSL_Data \
       ConfigTemplates \
