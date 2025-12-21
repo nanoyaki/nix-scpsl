@@ -29,10 +29,9 @@ let
 
   singleAttrOf =
     elemType:
-    (types.attrsOf elemType)
-    // {
-      check = actual: (lib.isAttrs actual) && ((lib.lists.length (lib.attrValues actual)) == 1);
-    };
+    types.addCheck (types.attrsOf elemType) (
+      actual: (lib.isAttrs actual) && ((lib.lists.length (lib.attrValues actual)) == 1)
+    );
 
   format = pkgs.formats.yaml { };
 in
