@@ -23,8 +23,8 @@ stdenv.mkDerivation (finalAttrs: {
     name = finalAttrs.pname;
     appId = "996560";
     depotId = "996562";
-    manifestId = "8299380878015604675";
-    hash = "sha256-GJqwpv4rm/PsmZjM4vFNbA44fxUiRi5NkCibwZMVbGs=";
+    manifestId = "914332672592611320";
+    hash = "sha256-a7tjY2v+533f6MA8ab71F8dnu9DOTTXzdg3CYz/bxTI=";
   };
 
   nativeBuildInputs = [
