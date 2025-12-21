@@ -237,14 +237,14 @@ in
                     settings = format.generate "nix_config_gameplay.yaml" conf.settings;
                     adminSettings = format.generate "nix_config_remoteadmin.yaml" conf.adminSettings;
                     mergeConfigs = ''
-                      ${yq} -r '
+                      ${yq} -r -I1 '
                           . * load("${adminSettings}")
                           | (.[][][] | select(kind == "seq")) style="flow"
                         ' \
                         ${templateDir}/config_remoteadmin.template.txt \
                         > "$HOME/${port}/config_remoteadmin.txt"
 
-                      ${yq} -r '
+                      ${yq} -r -I1 '
                           del(.port_queue, .geoblocking_whitelist, .geoblocking_blacklist)
                           | . * load("${settings}")
                           | .spawn_protect_team style="flow"
@@ -252,7 +252,7 @@ in
                         ${templateDir}/config_gameplay.template.txt \
                         > "$HOME/${port}/config_gameplay.txt"
 
-                      sed -Ei 's/\"//' "$HOME/${port}/config_"{gameplay,remoteadmin}.txt
+                      sed -Ei 's/\"//g' "$HOME/${port}/config_"{gameplay,remoteadmin}.txt
                     '';
                   in
                   ''
