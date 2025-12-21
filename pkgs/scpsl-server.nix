@@ -13,6 +13,7 @@
   pango,
   glib,
   dbus,
+  yq-go,
   fetchSteam,
 }:
 
@@ -30,6 +31,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     autoPatchelfHook
     makeWrapper
+    yq-go
   ];
 
   buildInputs = [
@@ -62,7 +64,8 @@ stdenv.mkDerivation (finalAttrs: {
     substituteInPlace ConfigTemplates/config_gameplay.template.txt \
       --replace-fail '::' '"::"' \
       --replace-fail '0.0.0.0' '"0.0.0.0"' \
-      --replace-fail 'the player stops' '# the player stops'
+      --replace-fail 'the player stops' '# the player stops' \
+      --replace-fail ' # Default is 10.' ""
 
     sed -Ei '/^#/d' \
       ConfigTemplates/*.template.txt

@@ -237,15 +237,22 @@ in
                     settings = format.generate "nix_config_gameplay.yaml" conf.settings;
                     adminSettings = format.generate "nix_config_remoteadmin.yaml" conf.adminSettings;
                     mergeConfigs = ''
-                      ${yq} -r '. * load("${adminSettings}") | (.[][][] | select(kind == "seq")) style="flow"' \
+                      ${yq} -r '
+                          . * load("${adminSettings}")
+                          | (.[][][] | select(kind == "seq")) style="flow"
+                        ' \
                         ${templateDir}/config_remoteadmin.template.txt \
                         > "$HOME/${port}/config_remoteadmin.txt"
 
-                      ${yq} -r '. * load("${settings}") | .spawn_protect_team style="flow"' \
+                      ${yq} -r '
+                          del(.port_queue, .geoblocking_whitelist, .geoblocking_blacklist)
+                          | . * load("${settings}")
+                          | .spawn_protect_team style="flow"
+                        ' \
                         ${templateDir}/config_gameplay.template.txt \
                         > "$HOME/${port}/config_gameplay.txt"
 
-                      sed -Ei 's/^([^:#]:[[:space:]]*)\"([^"]*)\"$/\1\2/' "$HOME/${port}/config_"{gameplay,remoteadmin}.txt
+                      sed -Ei 's/\"//' "$HOME/${port}/config_"{gameplay,remoteadmin}.txt
                     '';
                   in
                   ''
@@ -291,7 +298,7 @@ in
                       exit 0
                     fi
 
-                    ${tmux} -S ${socket} send-keys C-u "stop" Enter
+                    ${tmux} -S ${socket} send-keys C-u "quit" Enter
 
                     while server_running; do sleep 1s; done
                   '';
