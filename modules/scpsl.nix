@@ -164,7 +164,7 @@ in
         assertion = all (
           conf:
           all (
-            member: elem (elemAt 0 (attrValues member)) conf.adminSettings.Roles
+            member: elem (elemAt (attrValues member) 0) conf.adminSettings.Roles
           ) conf.adminSettings.Members
         ) (attrValues cfg.servers);
         message = ''
