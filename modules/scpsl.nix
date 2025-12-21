@@ -253,6 +253,7 @@ in
                         > "$HOME/${port}/config_gameplay.txt"
 
                       sed -Ei 's/\"//g' "$HOME/${port}/config_"{gameplay,remoteadmin}.txt
+                      sed -Ei 's/^[[:space:]]{2}\-/ \-/' "$HOME/${port}/config_"{gameplay,remoteadmin}.txt
                     '';
                   in
                   ''
