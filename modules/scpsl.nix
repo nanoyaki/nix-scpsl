@@ -24,6 +24,7 @@ let
     all
     elemAt
     elem
+    unique
     ;
   cfg = config.services.scpsl-server;
 
@@ -33,46 +34,61 @@ let
       actual: (lib.isAttrs actual) && ((lib.lists.length (lib.attrValues actual)) == 1)
     );
 
+  mkEnableOpt =
+    description:
+    mkEnableOption ""
+    // {
+      inherit description;
+      example = true;
+    };
+
+  mkOpt =
+    type: default: description:
+    mkOption {
+      inherit type default description;
+    };
+
   format = pkgs.formats.yaml { };
 in
 
 {
   options.services.scpsl-server = {
-    enable = mkEnableOption "SCP:SL server";
+    enable = mkEnableOpt ''
+      Whether to enable declarative management of SCP:SL
+      servers. When enabled, servers defined using
+      {option}`services.scpsl-server.servers`
+      will be set up.
+    '';
 
     package = mkPackageOption pkgs "scpsl-server" { };
 
-    eula = mkEnableOption "" // {
-      description = "Whether to accept the eula";
-    };
+    eula = mkEnableOpt ''
+      Whether to accept [Northwood Studios' EULA][eula]. 
+      This option must be set to `true` in order
+      to run any SCP:SL server.
 
-    openFirewall = mkEnableOption "" // {
-      description = "Whether to open the ports of every instance";
-    };
+      [eula]: https://store.steampowered.com/eula/700330_eula_0
+    '';
 
-    dataDir = mkOption {
-      type = types.path;
-      default = "/srv/scpsl";
-      description = ''
-        The data directory containing the configuration files
-      '';
-    };
+    openFirewall = mkEnableOpt ''
+      Whether to open the ports of all servers defined
+      in {option}`services.scpsl-server.servers`.
+    '';
 
-    user = mkOption {
-      type = types.str;
-      default = "scpsl";
-      description = ''
-        The user to run the server with
-      '';
-    };
+    dataDir = mkOpt types.path "/srv/scpsl" ''
+      The data directory containing the configuration files
+      and logs for all servers.
+    '';
 
-    group = mkOption {
-      type = types.str;
-      default = "scpsl";
-      description = ''
-        The group to run the server with
-      '';
-    };
+    user = mkOpt types.str "scpsl" ''
+      The user that runs and creates the servers.
+    '';
+
+    group = mkOpt types.str "scpsl" ''
+      The group that has access to the server and
+      it's files. To attach to the tmux socket it is necessary
+      for the user to be part of this group.
+    '';
 
     servers = mkOption {
       type = types.attrsOf (
@@ -81,21 +97,29 @@ in
 
           {
             options = {
-              enable = mkEnableOption "an SCP:SL instance" // {
-                default = true;
-              };
+              enable = mkEnableOpt ''
+                Whether to enable this server.
+              '';
 
-              autoStart = mkEnableOption "auto starting the instance on boot" // {
-                default = true;
-              };
+              autoStart =
+                mkEnableOpt ''
+                  Whether to start this server on boot.
+                  If set to false, use `systemctl start scpsl-server-<name>`
+                  to start the server.
+                ''
+                // {
+                  default = true;
+                };
 
               socketPath = mkOption {
                 type = types.functionTo types.path;
                 description = ''
-                  Function from a server name to the path at which the server's tmux socket is placed.
+                  Function from the server's name to the path at which the server's tmux socket is placed.
+                  Defaults to {file}`/run/scpsl/<name>.sock`. 
                 '';
                 default = name: "/run/scpsl/${name}.sock";
                 defaultText = literalExpression ''name: "/run/scpsl/''${name}.sock"'';
+                example = literalExpression ''_: ''${cfg.dataDir}/main-server.sock'';
               };
 
               settings = mkOption {
@@ -106,10 +130,17 @@ in
                     type = types.port;
                     default = if (match "[0-9]{1,5}" name != null) then toInt name else 7777;
                     description = ''
-                      The port for this instance
+                      The port for this server.
                     '';
+                    example = 7778;
                   };
                 };
+                description = ''
+                  The gameplay configuration. See the
+                  [Tech Support Public Wiki][gameplay-config] for more information.
+
+                  [gameplay-config]: https://techwiki.scpslgame.com/books/server-guides/page/2-gameplay-config-setup
+                '';
                 default = { };
               };
 
@@ -122,9 +153,12 @@ in
                       type = with types; listOf (singleAttrOf str);
                       default = [ ];
                       description = ''
-                        A list of an a steam 64 id followed by @steam mapped to a role defined
-                        in {option}`services.scpsl-server.servers.<name>.adminSettings.Roles`
+                        A list of an a steam 64 id followed by 
+                        `@steam` mapped to a role defined in
+                        {option}`services.scpsl-server.servers.<name>.adminSettings.Roles`.
+                        Use this option to give a user administrative priviledges.
                       '';
+                      example = literalExpression ''[ { "someSteam64Id@steam" = "owner"; } ]'';
                     };
 
                     Roles = mkOption {
@@ -134,15 +168,32 @@ in
                         "admin"
                         "moderator"
                       ];
+                      description = ''
+                        List of role names that users are allowed to be assigned to.
+                      '';
+                      example = literalExpression ''[ "admin" ]'';
                     };
                   };
                 };
+                description = ''
+                  The remote admin configuration. See the
+                  [Tech Support Public Wiki][admin-config] for more information.
+
+                  [admin-config]: https://techwiki.scpslgame.com/books/server-guides/page/3-remote-admin-config-setup
+                '';
                 default = { };
               };
             };
           }
         )
       );
+      description = ''
+        The individual server configuration. If the attribute of 
+        {option}`services.scpsl-server.servers.<name>` is set
+        to an integer value it's assumed to be the port the server
+        binds to.
+      '';
+      default = { };
     };
   };
 
@@ -151,13 +202,13 @@ in
       {
         assertion = cfg.eula;
         message = ''
-          You must accept the eula to run an SCP:SL server
+          You must accept the eula to run an SCP:SL server.
         '';
       }
       {
         assertion = cfg.enable && cfg.servers != { };
         message = ''
-          Enabling SCP:SL without configuring a server doesn't work
+          Enabling SCP:SL servers without configuring any servers doesn't have any effect.
         '';
       }
       {
@@ -181,19 +232,21 @@ in
     ];
 
     networking.firewall.allowedUDPPorts = mkIf cfg.openFirewall (
-      map (conf: conf.settings.port) (attrValues cfg.servers)
+      unique (map (conf: conf.settings.port) (attrValues cfg.servers))
     );
 
-    users.users.scpsl = mkIf (cfg.user == "scpsl") {
-      inherit (cfg) group;
-      description = "SCP Secret Laboratory server service user";
-      home = cfg.dataDir;
-      createHome = true;
-      homeMode = "770";
-      isSystemUser = true;
+    users.users = mkIf (cfg.user == "scpsl") {
+      scpsl = {
+        inherit (cfg) group;
+        description = "SCP Secret Laboratory server service user";
+        home = cfg.dataDir;
+        createHome = true;
+        homeMode = "770";
+        isSystemUser = true;
+      };
     };
 
-    users.groups.scpsl = mkIf (cfg.group == "scpsl") { };
+    users.groups = mkIf (cfg.group == "scpsl") { scpsl = { }; };
 
     systemd.services = mapAttrs' (name: conf: {
       name = "scpsl-server-${name}";

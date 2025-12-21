@@ -14,7 +14,7 @@
       self,
       nixpkgs,
       steam-fetcher,
-    }:
+    }@inputs:
 
     let
       # Only x86_64-linux is supported
@@ -42,6 +42,9 @@
         scpsl-server = import ./modules/scpsl.nix { inherit self; };
       };
 
-      packages.${system}.scpsl-server = pkgs.callPackage ./pkgs/scpsl-server.nix { };
+      packages.${system} = {
+        scpsl-server = pkgs.callPackage ./pkgs/scpsl-server.nix { };
+        generate-docs = pkgs.callPackage ./pkgs/generate-doc.nix { inherit inputs; };
+      };
     };
 }
