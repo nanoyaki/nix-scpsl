@@ -299,7 +299,7 @@ in
                       exit 0
                     fi
 
-                    ${tmux} -S ${socket} send-keys C-u "quit" Enter
+                    ${tmux} -S ${socket} send-keys -t 0 C-c
 
                     while server_running; do sleep 1s; done
                   '';
