@@ -43,7 +43,7 @@
       };
 
       packages.${system} = {
-        scpsl-server = pkgs.callPackage ./pkgs/scpsl-server.nix { };
+        scpsl-server = pkgs.callPackage ./pkgs/scpsl-server/package.nix { };
         generate-docs = pkgs.callPackage ./pkgs/generate-doc.nix { inherit inputs; };
       };
     };

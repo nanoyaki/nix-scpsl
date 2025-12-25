@@ -15,11 +15,13 @@
   dbus,
   yq-go,
   fetchSteam,
+  _experimental-update-script-combinators,
+  nix-update-script,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "scpsl-server";
-  version = "0";
+  version = "914332672592611320";
   src = fetchSteam {
     name = finalAttrs.pname;
     appId = "996560";
@@ -93,6 +95,22 @@ stdenv.mkDerivation (finalAttrs: {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = _experimental-update-script-combinators.sequence [
+    [
+      ./steam-update.sh
+      finalAttrs.src.appId
+      finalAttrs.src.depotId
+      "pkgs/scpsl-server/package.nix"
+    ]
+    (nix-update-script {
+      extraArgs = [
+        "-F"
+        "--version"
+        finalAttrs.src.manifestId
+      ];
+    })
+  ];
 
   meta = with lib; {
     description = "Some dedicated server";

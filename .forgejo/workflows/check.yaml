@@ -1,0 +1,18 @@
+on:
+  push:
+    paths:
+      - '**/*.nix'
+      - flake.lock
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: native
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Flake checks
+        run: nix flake check
