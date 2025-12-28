@@ -11,6 +11,10 @@ jobs:
   checks:
     runs-on: nix
     steps:
+      - name: Install dependencies
+        run: >
+          nix profile add nixpkgs#nodejs
+
       - name: Checkout
         uses: actions/checkout@v4
 
