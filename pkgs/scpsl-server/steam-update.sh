@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i bash -p depotdownloader coreutils gnugrep gnused
+#!nix-shell -i bash -p curl jq coreutils gnugrep gnused
 
 APP_ID="$1"
 DEPOT_ID="$2"
