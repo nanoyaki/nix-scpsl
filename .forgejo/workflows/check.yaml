@@ -6,6 +6,11 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
+
+env:
+  NIX_CONFIG: |
+    experimental-features = nix-command flakes
 
 jobs:
   checks:
