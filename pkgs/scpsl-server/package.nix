@@ -15,19 +15,17 @@
   dbus,
   yq-go,
   fetchSteam,
-  _experimental-update-script-combinators,
-  nix-update-script,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "scpsl-server";
-  version = "914332672592611320";
+  version = "1639156305552278866";
   src = fetchSteam {
     name = finalAttrs.pname;
     appId = "996560";
     depotId = "996562";
-    manifestId = "914332672592611320";
-    hash = "sha256-a7tjY2v+533f6MA8ab71F8dnu9DOTTXzdg3CYz/bxTI=";
+    manifestId = "1639156305552278866";
+    hash = "sha256-qi5u+h6rEYs5/qaASdK6wZwOvMxcFM1So5+YQknwb3Q=";
   };
 
   nativeBuildInputs = [
@@ -96,20 +94,12 @@ stdenv.mkDerivation (finalAttrs: {
     runHook postInstall
   '';
 
-  passthru.updateScript = _experimental-update-script-combinators.sequence [
-    [
-      ./steam-update.sh
-      finalAttrs.src.appId
-      finalAttrs.src.depotId
-      "pkgs/scpsl-server/package.nix"
-    ]
-    (nix-update-script {
-      extraArgs = [
-        "-F"
-        "--version"
-        finalAttrs.src.manifestId
-      ];
-    })
+  passthru.updateScript = [
+    ./steam-update.sh
+    finalAttrs.src.appId
+    finalAttrs.src.depotId
+    finalAttrs.pname
+    "pkgs/scpsl-server/package.nix"
   ];
 
   meta = with lib; {
