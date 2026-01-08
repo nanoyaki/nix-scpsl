@@ -26,7 +26,7 @@ stdenv.mkDerivation (finalAttrs: {
     name = finalAttrs.pname;
     appId = "996560";
     depotId = "996562";
-    manifestId = "914332672592611320";
+    manifestId = "6868598907511038526";
     hash = "sha256-a7tjY2v+533f6MA8ab71F8dnu9DOTTXzdg3CYz/bxTI=";
   };
 
