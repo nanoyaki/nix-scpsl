@@ -19,13 +19,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "scpsl-server";
-  version = "8444671425106151572";
+  version = "8044921936894816598";
   src = fetchSteam {
     name = finalAttrs.pname;
     appId = "996560";
     depotId = "996562";
-    manifestId = "8444671425106151572";
-    hash = "sha256-9kPoFTJDcBgvUirv66W/aw8BcSFsvIgSJgVKzvWo2zo=";
+    manifestId = "8044921936894816598";
+    hash = "sha256-sUkdZiJ5VIj+aXkJhNouoLPwlZ/6XsNpAvPDWMAuJ2k=";
   };
 
   nativeBuildInputs = [
@@ -64,8 +64,7 @@ stdenv.mkDerivation (finalAttrs: {
     substituteInPlace ConfigTemplates/config_gameplay.template.txt \
       --replace-fail '::' '"::"' \
       --replace-fail '0.0.0.0' '"0.0.0.0"' \
-      --replace-fail 'the player stops' '# the player stops' \
-      --replace-fail ' # Default is 10.' ""
+      --replace-fail 'the player stops' '# the player stops'
 
     sed -Ei '/^#/d' \
       ConfigTemplates/*.template.txt
