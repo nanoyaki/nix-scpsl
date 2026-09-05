@@ -19,13 +19,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "scpsl-server";
-  version = "6949866359015383229";
+  version = "8852828344330156395";
   src = fetchSteam {
     name = finalAttrs.pname;
     appId = "996560";
     depotId = "996562";
-    manifestId = "6949866359015383229";
-    hash = "sha256-Y2XF05i45EWTm07uy+y7NEGuPkf8/6fgmdOPJcfLQ8E=";
+    manifestId = "8852828344330156395";
+    hash = "sha256-2rhtwTyJBw60p0gUx5shnYfi0DpuM6YF9v4bbFp5TUQ=";
   };
 
   nativeBuildInputs = [
